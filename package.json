@@ -54,6 +54,8 @@
         "error",
         "never"
       ],
+      "indent": ["warn"],
+      "no-debugger": ["warn"],
       "no-unused-vars": "off",
       "max-len": [
         1,
