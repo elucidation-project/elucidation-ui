@@ -1,16 +1,30 @@
 <template>
   <div id="app">
     <el-container class="elucidation-app">
-      <el-aside>
-      <service-list></service-list>
+      <el-aside class="elucidation-app-left">
+        <el-container>
+          <el-header class="elucidation-app-header">
+            <span>Services</span>
+          </el-header>
+          <el-main>
+            <service-list v-on:service-selected="onServiceSelected">
+            </service-list>
+          </el-main>
+        </el-container>
       </el-aside>
-      <el-container>
+      <el-container class="elucidation-app-center">
         <el-main>
           <relationships></relationships>
         </el-main>
-        <el-footer height="310">
+        <el-footer height="400">
+          <el-collapse class="identifier-details" height="400px">
+            <el-collapse-item title="Dependencies">
               <tracked-identifiers></tracked-identifiers>
+            </el-collapse-item>
+            <el-collapse-item title="Unused Identifiers">
               <unused-identifiers></unused-identifiers>
+            </el-collapse-item>
+          </el-collapse>
         </el-footer>
       </el-container>
     </el-container>
@@ -30,6 +44,11 @@ export default {
     ServiceList,
     TrackedIdentifiers,
     UnusedIdentifiers
+  },
+  methods: {
+    onServiceSelected(selection) {
+      console.log(`selection: ${selection}`);
+    }
   }
 };
 </script>
@@ -61,8 +80,33 @@ body, html {
   padding: 5px;
 }
 
-.el-container:not(.default-height) {
+.el-container.elucidation-app-center {
+  padding: 0 0 2px 5px;
+}
+
+.el-container:not(.custom-height) {
   height: 100%;
+}
+
+.elucidation-app .identifier-details {
+  border: 0;
+}
+
+.elucidation-app .elucidation-app-header,
+.elucidation-app .identifier-details .el-collapse-item__header {
+  background-color: #4682B4; /* steel blue */
+  color: #fff;
+  font-weight: bold;
+  font-size: 1em;
+  height: 30px !important;
+  padding: 2px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.elucidation-app-center .elucidation-app-relationships,
+.elucidation-app-left .el-container {
+  padding: 0;
 }
 
 </style>

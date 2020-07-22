@@ -13,7 +13,9 @@
     "core-js": "^3.6.5",
     "element-theme-chalk": "^2.13.2",
     "element-ui": "^2.4.5",
+    "lodash": "^4.17.19",
     "vue": "^2.6.11",
+    "vue-lodash": "^2.1.2",
     "vue-router": "^3.2.0",
     "vue2vis": "^0.0.18",
     "vuex": "^3.4.0"
@@ -48,8 +50,15 @@
       "parser": "babel-eslint"
     },
     "rules": {
-      "comma-dangle": ["error", "never"],
-      "no-unused-vars": "off"
+      "comma-dangle": [
+        "error",
+        "never"
+      ],
+      "no-unused-vars": "off",
+      "max-len": [
+        1,
+        120
+      ]
     },
     "overrides": [
       {
