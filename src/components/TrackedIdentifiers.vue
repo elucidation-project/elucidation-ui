@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: 150px">
+  <el-container class="custom-height" style="height:150px">
     <el-main>
       <el-table :data="identifiers" height="100%" style="width: 100%">
         <el-table-column prop="connectionIdentifier" label="Identifier"></el-table-column>

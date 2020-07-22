@@ -1,6 +1,12 @@
 <template>
-  <el-table :data="services" height="100%" style="width: 100%">
-    <el-table-column prop="name" label="Service"></el-table-column>
+  <el-table
+    highlight-current-row
+    :show-header=false
+    @current-change="onCurrentChange"
+    :data="services" height="100%" style="width: 100%">
+
+    <el-table-column prop="name" :formatter="(row, col, val) => _.startCase(val)">
+    </el-table-column>
   </el-table>
 </template>
 
@@ -17,11 +23,12 @@ export default {
       .then((data) => this.setServices(data));
   },
   methods: {
+    onCurrentChange(selection) {
+      this.$emit('service-selected', selection.name);
+    },
     setServices(services) {
       this.services = [];
-      for (let i = 0; i < services.length; i += 1) {
-        this.services.push({ name: services[i] });
-      }
+      services.forEach((service) => this.services.push({ name: service }));
     }
   }
 };
