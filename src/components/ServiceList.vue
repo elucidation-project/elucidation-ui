@@ -1,13 +1,23 @@
 <template>
-  <el-table
-    highlight-current-row
-    :show-header=false
-    @current-change="onCurrentChange"
-    :data="services" height="100%" style="width: 100%">
+  <el-container>
+    <el-header class="elucidation-app-header">
+      <div class="elucidation-app-header-body">
+        <span class="elucidation-app-header-title">Services</span>
+        <el-button icon="el-icon-refresh" @click="onRefreshList" circle></el-button>
+      </div>
+    </el-header>
+    <el-main>
+      <el-table
+        highlight-current-row
+        :show-header=false
+        @current-change="onCurrentChange"
+        :data="services" height="100%" style="width: 100%">
 
-    <el-table-column prop="name" :formatter="(row, col, val) => _.startCase(val)">
-    </el-table-column>
-  </el-table>
+        <el-table-column prop="name" :formatter="(row, col, val) => _.startCase(val)">
+        </el-table-column>
+      </el-table>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
@@ -17,17 +27,26 @@ export default {
   data() {
     return { services: [] };
   },
-  created() {
-    fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/services`)
-      .then((response) => response.json())
-      .then((data) => this.setServices(data));
+  mounted() {
+    this.refreshList();
   },
   methods: {
     onCurrentChange(selection) {
       this.$emit('service-selected', selection.name);
     },
+    onRefreshList() {
+      this.refreshList();
+    },
+    refreshList() {
+      const mask = this.$loading({ target: this.$el });
+      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/services`)
+        .then((response) => response.json())
+        .then((data) => this.setServices(data))
+        .finally(() => mask.close());
+    },
     setServices(services) {
-      this.services = [];
+      services.sort();
+      this.services.length = 0;
       services.forEach((service) => this.services.push({ name: service }));
     }
   }
