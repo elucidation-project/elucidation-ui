@@ -1,0 +1,49 @@
+---
+stages:
+  - build
+  - test
+  - quality
+  - deploy
+
+before_script:
+  - yarn global add @vue/cli
+  - yarn global add @vue/cli-service-global
+  - yarn install --production=false
+
+build_app:
+  image: vuejs/ci
+  stage: build
+  script:
+    - yarn build
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist
+
+unit_tests:
+  image: vuejs/ci
+  stage: test
+  script:
+    - yarn test:unit
+
+#e2e_tests:
+#  image: ebiven/vue-cli
+#  stage: test
+#  script:
+#    - yarn install --progress=false
+#    - vue-cli-service test:e2e
+
+sonar:
+  image: sonarsource/sonar-scanner-cli:latest
+  stage: quality
+  script:
+    - sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.login="${SONAR_CLOUD_LOGIN}" -X
+  allow_failure: true
+  variables:
+    SONAR_PROJECT_BASE_DIR: "${CI_PROJECT_DIR}"
+    SONAR_TOKEN: "${SONAR_CLOUD_LOGIN}"
+    SONAR_LOGIN: "${SONAR_CLOUD_LOGIN}"
+    SONAR_HOST_URL: https://sonarcloud.io
+    GIT_DEPTH: 0
+  only:
+    - master
