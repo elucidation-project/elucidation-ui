@@ -4,23 +4,23 @@ body, html {
   margin: 0;
 }
 
-#app {
+.elucidation {
+  background-color: #777;
+  color: #2c3e50;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  height: 100%;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  height: 100%;
-  background-color: #777;
+  -webkit-font-smoothing: antialiased;
 }
 
-.elucidation-app .el-main,
-.elucidation-app .el-footer,
-.elucidation-app .el-header {
+.elucidation .el-main,
+.elucidation .el-footer,
+.elucidation .el-header {
     padding: 0;
 }
 
-.elucidation-app .el-header .el-button {
+.elucidation .el-header .el-button {
   background: transparent;
   border: 0;
   color: #fff;
@@ -32,7 +32,7 @@ body, html {
   padding: 5px;
 }
 
-.el-container.elucidation-app-center {
+.el-container.elucidation-center {
   padding: 0 0 2px 5px;
 }
 
@@ -40,31 +40,39 @@ body, html {
   height: 100%;
 }
 
-.elucidation-app .identifier-details {
+.elucidation .identifier-details {
   border: 0;
 }
 
-.elucidation-app .elucidation-app-header,
-.elucidation-app .identifier-details .el-collapse-item__header {
+.elucidation .elucidation-header,
+.elucidation .identifier-details .el-collapse-item__header {
   background-color: #4682B4; /* steel blue */
   color: #fff;
-  font-weight: bold;
   font-size: 1em;
+  font-weight: bold;
   height: 30px !important;
   padding: 2px 10px;
   text-align: left;
   vertical-align: middle;
 }
 
-.elucidation-app .elucidation-app-header .elucidation-app-header-body {
+.elucidation .elucidation-header .elucidation-header-body {
   display: flex;
 }
 
-.elucidation-app .elucidation-app-header .elucidation-app-header-body .elucidation-app-header-title {
+.elucidation .elucidation-header .elucidation-header-body .elucidation-header-title {
   flex-grow: 1;
 }
 
-.elucidation-app-center .elucidation-app-relationships,
-.elucidation-app-left .el-container {
+.elucidation-center .elucidation-relationships,
+.elucidation-left .el-container {
   padding: 0;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-table .vgt-row-header {
+  padding: .25em 1.25em .25em .25em;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-table td {
+  padding: .25em;
 }

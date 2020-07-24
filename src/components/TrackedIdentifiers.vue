@@ -1,10 +1,18 @@
 <template>
-  <el-container class="custom-height" style="height:150px">
+  <el-container class="custom-height">
     <el-main>
-      <el-table :data="identifiers" height="100%" style="width: 100%">
-        <el-table-column prop="connectionIdentifier" label="Identifier"></el-table-column>
-        <el-table-column prop="connectionType" label="Protocol"></el-table-column>
-      </el-table>
+      <vue-good-table
+        class="elucidation-vue-good-table"
+        :fixed-header="true"
+        style="height:180px"
+        max-height="180px"
+        :columns="columns"
+        :rows="rows"
+        :group-options="{
+          enabled: true,
+          collapsable: true
+        }">
+      </vue-good-table>
     </el-main>
   </el-container>
 </template>
@@ -13,11 +21,44 @@
 export default {
   name: 'TrackedIdentifiers',
   data() {
-    return { identifiers: [{ connectionIdentifier: 'Select a Service to see Dependencies' }] };
+    return {
+      columns: [{
+        label: 'Connection Identifier',
+        field: 'connectionIdentifier'
+      }, {
+        label: 'Communication Type',
+        field: 'communicationType'
+      }, {
+        label: 'Last Observed On',
+        field: 'observedAt'
+      }],
+      rows: []
+    };
   },
   methods: {
-    setTrackedIdentifiers(identifiers) {
-      this.identifiers = identifiers;
+    setService(service) {
+      const mask = this.$loading({ target: this.$el });
+      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/events`)
+        .then((response) => response.json())
+        .then((data) => this.setConnectionEvents(data))
+        .finally(() => mask.close());
+    },
+    setConnectionEvents(events) {
+      const rows = [];
+      events.forEach((event) => {
+        let row = rows.find((r) => r.label === event.eventDirection);
+        if (!row) {
+          row = {
+            label: event.eventDirection,
+            mode: 'span',
+            html: false,
+            children: []
+          };
+          rows.push(row);
+        }
+        row.children.push(event);
+      });
+      this.rows = rows;
     }
   }
 };
