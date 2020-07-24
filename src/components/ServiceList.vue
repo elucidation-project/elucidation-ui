@@ -1,8 +1,8 @@
 <template>
   <el-container>
-    <el-header class="elucidation-app-header">
-      <div class="elucidation-app-header-body">
-        <span class="elucidation-app-header-title">Services</span>
+    <el-header class="elucidation-header">
+      <div class="elucidation-header-body">
+        <span class="elucidation-header-title">Services</span>
         <el-button icon="el-icon-refresh" @click="onRefreshList" circle></el-button>
       </div>
     </el-header>

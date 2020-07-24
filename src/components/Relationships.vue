@@ -1,6 +1,6 @@
 <template>
-  <el-container class="elucidation-app-relationships">
-    <el-header class="elucidation-app-header">
+  <el-container class="elucidation-relationships">
+    <el-header class="elucidation-header">
       <span>Relationships</span>
     </el-header>
     <el-main>
