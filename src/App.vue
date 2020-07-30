@@ -14,7 +14,7 @@
               <tracked-identifiers ref="trackedIdentifiers"></tracked-identifiers>
             </el-collapse-item>
             <el-collapse-item title="Unused Identifiers">
-              <unused-identifiers></unused-identifiers>
+              <unused-identifiers ref="unusedIdentifiers"></unused-identifiers>
             </el-collapse-item>
           </el-collapse>
         </el-footer>
@@ -39,8 +39,8 @@ export default {
   },
   methods: {
     onServiceSelected(selection) {
-      console.log(`selection: ${selection}`);
       this.$refs.trackedIdentifiers.setService(selection);
+      this.$refs.unusedIdentifiers.setService(selection);
     }
   }
 };

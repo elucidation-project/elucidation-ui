@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "element-theme-chalk": "^2.13.2",
     "element-ui": "^2.4.5",
+    "jquery": "^3.5.1",
     "lodash": "^4.17.19",
     "vue": "^2.6.11",
     "vue-good-table": "^2.20.0",
@@ -66,7 +67,10 @@
       ],
       "max-len": [
         1,
-        120
+        140
+      ],
+      "one-var": [
+        0
       ]
     },
     "overrides": [

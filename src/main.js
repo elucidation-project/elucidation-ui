@@ -18,6 +18,10 @@ Vue.use(ElementUI);
 Vue.use(VueLodash, { lodash });
 Vue.use(VueGoodTablePlugin);
 
+const $ = require('jquery');
+
+window.$ = $;
+
 new Vue({
   router,
   store,

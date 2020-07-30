@@ -56,12 +56,20 @@ body, html {
   vertical-align: middle;
 }
 
+.elucidation .identifier-details .el-collapse-item__content {
+  padding-bottom: 0;
+}
+
 .elucidation .elucidation-header .elucidation-header-body {
   display: flex;
 }
 
 .elucidation .elucidation-header .elucidation-header-body .elucidation-header-title {
   flex-grow: 1;
+}
+
+.elucidation .unused-identifiers .el-table__row td {
+  padding: 6px 0;
 }
 
 .elucidation-center .elucidation-relationships,
@@ -75,4 +83,13 @@ body, html {
 
 .elucidation .elucidation-vue-good-table .vgt-table td {
   padding: .25em;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-fixed-header .vgt-table {
+  background: linear-gradient(#f4f5f8,#f1f3f6);
+}
+
+.elucidation .elucidation-vue-good-table .vgt-fixed-header .elucidation-header-spacer {
+  padding: 0px;
+  width: 0px;
 }
