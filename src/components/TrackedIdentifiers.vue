@@ -12,6 +12,7 @@
           enabled: true,
           collapsable: true
         }">
+        <div class="empty-slot" slot="emptystate">There are no Dependencies for the selected service</div>
       </vue-good-table>
     </el-main>
   </el-container>
@@ -24,13 +25,16 @@ export default {
     return {
       columns: [{
         label: 'Connection Identifier',
-        field: 'connectionIdentifier'
+        field: 'connectionIdentifier',
+        width: '40%'
       }, {
         label: 'Communication Type',
-        field: 'communicationType'
+        field: 'communicationType',
+        width: '20%'
       }, {
         label: 'Last Observed On',
-        field: 'observedAt'
+        field: 'observedAt',
+        width: '40%'
       }],
       rows: []
     };
