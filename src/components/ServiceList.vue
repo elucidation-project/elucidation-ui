@@ -28,7 +28,7 @@ export default {
     return { services: [] };
   },
   mounted() {
-    this.refreshList();
+    this.loadServices();
   },
   methods: {
     onCurrentChange(selection) {
@@ -37,11 +37,14 @@ export default {
     onRefreshList() {
       this.refreshList();
     },
-    refreshList() {
-      const mask = this.$loading({ target: this.$el });
+    loadServices() {
       return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/services`)
         .then((response) => response.json())
-        .then((data) => this.setServices(data))
+        .then((data) => this.setServices(data));
+    },
+    refreshList() {
+      const mask = this.$loading({ target: this.$el });
+      return this.loadServices()
         .finally(() => mask.close());
     },
     setServices(services) {
