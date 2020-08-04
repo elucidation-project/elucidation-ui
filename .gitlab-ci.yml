@@ -36,7 +36,13 @@ unit_tests:
     - yarn global add @vue/cli
     - yarn global add @vue/cli-service-global
     - yarn install --production=false
-    - yarn test:unit
+    - yarn test:unit --coverage --reporters="default" --reporters="jest-junit"
+  artifacts:
+    paths:
+      - "junit.xml"
+      - "coverage/clover"
+    reports:
+      junit: junit.xml
 
 #e2e_tests:
 #  image: ebiven/vue-cli
