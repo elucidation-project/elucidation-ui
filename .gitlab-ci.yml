@@ -5,8 +5,9 @@ stages:
   - quality
 
 variables:
-  SAST_EXCLUDED_PATHS: "dist"
+  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, dist"
   SECURE_LOG_LEVEL: "debug"
+  SAST_DISABLE_BABEL: "true"
 
 include:
   - template: Jobs/Code-Quality.gitlab-ci.yml
