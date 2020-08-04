@@ -40,7 +40,8 @@ unit_tests:
   artifacts:
     paths:
       - "junit.xml"
-      - "coverage/clover.xml"
+      - "coverage/lcov.info"
+      - "test-report.xml"
     reports:
       junit: junit.xml
 
