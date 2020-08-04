@@ -51,8 +51,11 @@
       "plugin:vue/essential",
       "@vue/airbnb"
     ],
+    "parser": "vue-eslint-parser",
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "babel-eslint",
+      "ecmaVersion": 8,
+      "sourceType": "module"
     },
     "rules": {
       "comma-dangle": [

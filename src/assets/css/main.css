@@ -8,10 +8,10 @@ body, html {
   background-color: #777;
   color: #2c3e50;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  height: 100%;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   -webkit-font-smoothing: antialiased;
+  height: 100%;
+  text-align: center;
 }
 
 .elucidation .el-main,
@@ -90,6 +90,6 @@ body, html {
 }
 
 .elucidation .elucidation-vue-good-table .vgt-fixed-header .elucidation-header-spacer {
-  padding: 0px;
-  width: 0px;
+  padding: 0;
+  width: 0;
 }
