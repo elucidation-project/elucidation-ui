@@ -37,6 +37,8 @@
     "eslint": "^7.5.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^6.2.2",
+    "jest-junit": "^11.1.0",
+    "jest-sonar-reporter": "^2.0.0",
     "vue-cli-plugin-element": "^1.0.1",
     "vue-template-compiler": "^2.6.11"
   },
@@ -95,6 +97,7 @@
     "preset": "@vue/cli-plugin-unit-jest",
     "setupFiles": [
       "./tests/setupJest.js"
-    ]
+    ],
+    "testResultsProcessor": "jest-sonar-reporter"
   }
 }
