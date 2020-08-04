@@ -98,7 +98,6 @@
     "setupFiles": [
       "./tests/setupJest.js"
     ],
-    "testResultsProcessor": "jest-sonar-reporter",
-    "coveragePathIgnorePatterns": ["/node_modules/", "/src/plugins/"]
+    "testResultsProcessor": "jest-sonar-reporter"
   }
 }
