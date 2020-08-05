@@ -2,6 +2,7 @@
   <el-container class="custom-height">
     <el-main>
       <vue-good-table
+        ref="trackedIdentifiersTable"
         class="elucidation-vue-good-table"
         :fixed-header="true"
         style="height:180px"
@@ -39,7 +40,13 @@ export default {
       rows: []
     };
   },
+  mounted() {
+    window.$(this.$refs.trackedIdentifiersTable.$el).find('.vgt-fixed-header thead tr').append('<tr class="elucidation-header-spacer"/>');
+  },
   methods: {
+    getConnectionEvents() {
+      return this.rows;
+    },
     setService(service) {
       const mask = this.$loading({ target: this.$el });
       return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/events`)
