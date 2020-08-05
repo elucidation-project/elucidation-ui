@@ -7,6 +7,8 @@ import VueLodash from 'vue-lodash';
 import VueGoodTablePlugin from 'vue-good-table';
 import lodash from 'lodash';
 
+const $ = require('jquery');
+window.$ = $;
 const localVue = createLocalVue();
 localVue.use(ElementUI);
 localVue.use(VueLodash, { lodash });

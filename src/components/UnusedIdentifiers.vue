@@ -34,6 +34,9 @@ export default {
       staticIdentifiers: []
     };
   },
+  mounted() {
+    window.$(this.$refs.unusedIdentifierTable.$el).find('.vgt-fixed-header thead tr').append('<tr class="elucidation-header-spacer"/>');
+  },
   methods: {
     setService(service) {
       const mask = this.$loading({ target: this.$el });
