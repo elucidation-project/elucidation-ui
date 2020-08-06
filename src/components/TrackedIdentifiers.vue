@@ -47,11 +47,18 @@ export default {
     getConnectionEvents() {
       return this.rows;
     },
+    loadConnectionEvents(service) {
+      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/events`)
+        .then((response) => {
+          const json = response.json();
+          return response.ok ? json : Promise.reject(new Error('Error loading Tracked Identifiers'));
+        })
+        .catch((error) => { this.$emit('load-events-error', error); });
+    },
     setService(service) {
       const mask = this.$loading({ target: this.$el });
-      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/events`)
-        .then((response) => response.json())
-        .then((data) => this.setConnectionEvents(data))
+      return this.loadConnectionEvents(service)
+        .then((data) => this.setConnectionEvents(data || []))
         .finally(() => mask.close());
     },
     setConnectionEvents(events) {

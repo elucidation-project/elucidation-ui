@@ -38,15 +38,25 @@ export default {
     window.$(this.$refs.unusedIdentifierTable.$el).find('.vgt-fixed-header thead tr').append('<tr class="elucidation-header-spacer"/>');
   },
   methods: {
-    setService(service) {
-      const mask = this.$loading({ target: this.$el });
-      fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/connectionIdentifier/${service}/unused`)
-        .then((response) => response.json())
-        .then((data) => this.setUnusedIdentifiers(data.identifiers))
-        .finally(() => mask.close());
-    },
     getUnusedIdentifiers() {
       return this.rows;
+    },
+    loadUnusedIdentifiers(service) {
+      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/connectionIdentifier/${service}/unused`)
+        .then((response) => {
+          const json = response.json();
+          return response.ok ? json : Promise.reject(new Error('Error loading Unused Identifiers'));
+        })
+        .catch((error) => { this.$emit('load-unused-identifiers-error', error); });
+    },
+    setService(service) {
+      const mask = this.$loading({ target: this.$el });
+      return this.loadUnusedIdentifiers(service)
+        .then((data) => {
+          const identifiers = data && data.identifiers ? data.identifiers : [];
+          this.setUnusedIdentifiers(identifiers);
+        })
+        .finally(() => mask.close());
     },
     setUnusedIdentifiers(identifiers) {
       this.rows = identifiers;
