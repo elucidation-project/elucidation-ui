@@ -16,6 +16,7 @@
     "jest-fetch-mock": "^3.0.3",
     "jquery": "^3.5.1",
     "lodash": "^4.17.19",
+    "moment": "^2.27.0",
     "vue": "^2.6.11",
     "vue-good-table": "^2.20.0",
     "vue-lodash": "^2.1.2",
