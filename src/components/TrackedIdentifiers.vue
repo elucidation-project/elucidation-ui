@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   name: 'TrackedIdentifiers',
   data() {
@@ -35,7 +37,8 @@ export default {
       }, {
         label: 'Last Observed On',
         field: 'observedAt',
-        width: '40%'
+        width: '40%',
+        formatFn: this.dateFormatFn
       }],
       rows: []
     };
@@ -77,6 +80,9 @@ export default {
         row.children.push(event);
       });
       this.rows = rows;
+    },
+    dateFormatFn(value) {
+      return moment(value).format('MMM Do YYYY HH:mm');
     }
   }
 };
