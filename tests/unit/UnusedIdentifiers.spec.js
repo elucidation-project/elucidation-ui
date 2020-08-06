@@ -53,4 +53,17 @@ describe('UnusedIdentifiers.vue', () => {
       done();
     });
   });
+
+  // Assigning 'done' tells the test to wait for us to call 'done()'
+  it('handles error', done => {
+    fetch.mockReject(new Error('Bad gateway'))
+
+    const wrapper = mount(UnusedIdentifiers, { localVue });
+    wrapper.vm.setService('foo-service');
+    process.nextTick(() => {
+      expect(wrapper.emitted()['load-unused-identifiers-error']).toBeTruthy()
+      expect(wrapper.text()).toMatch(/There are no Unused Identifiers for the selected service/);
+      done();
+    });
+  });
 });

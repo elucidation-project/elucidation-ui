@@ -9,6 +9,7 @@
     <el-main>
       <el-table
         highlight-current-row
+        empty-text="There are no Services"
         :show-header=false
         @current-change="onCurrentChange"
         :data="services" height="100%" style="width: 100%">
@@ -39,8 +40,17 @@ export default {
     },
     loadServices() {
       return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/services`)
-        .then((response) => response.json())
-        .then((data) => this.setServices(data));
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Error loading services');
+          }
+          return response.json();
+        })
+        .then((data) => this.setServices(data))
+        .catch((error) => {
+          this.$emit('load-services-error', error);
+          this.setServices([]);
+        });
     },
     refreshList() {
       const mask = this.$loading({ target: this.$el });

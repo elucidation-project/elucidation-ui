@@ -2,7 +2,10 @@
   <div id="app" class="elucidation">
     <el-container>
       <el-aside class="elucidation-left">
-        <service-list v-on:service-selected="onServiceSelected"></service-list>
+        <service-list
+          @service-selected="onServiceSelected"
+          @load-services-error="onLoadServicesError">
+        </service-list>
       </el-aside>
       <el-container class="elucidation-center">
         <el-main>
@@ -24,6 +27,7 @@
 </template>
 
 <script>
+import { MessageBox } from 'element-ui';
 import Relationships from './components/Relationships.vue';
 import ServiceList from './components/ServiceList.vue';
 import TrackedIdentifiers from './components/TrackedIdentifiers.vue';
@@ -38,6 +42,9 @@ export default {
     UnusedIdentifiers
   },
   methods: {
+    onLoadServicesError(error) {
+      this.$alert(error.message, 'Error', { type: 'error', confirmButtonText: 'Ok' });
+    },
     onServiceSelected(selection) {
       this.$refs.trackedIdentifiers.setService(selection);
       this.$refs.unusedIdentifiers.setService(selection);

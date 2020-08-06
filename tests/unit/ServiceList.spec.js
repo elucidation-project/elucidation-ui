@@ -27,4 +27,16 @@ describe('ServiceList.vue', () => {
       done();
     });
   });
+
+  // Assigning 'done' tells the test to wait for us to call 'done()'
+  it('handles error', done => {
+    fetch.mockReject(new Error('Bad gateway'))
+
+    const wrapper = mount(ServiceList, { localVue });
+    process.nextTick(() => {
+      expect(wrapper.emitted()['load-services-error']).toBeTruthy()
+      expect(wrapper.text()).toMatch(/There are no Services/);
+      done();
+    });
+  });
 });

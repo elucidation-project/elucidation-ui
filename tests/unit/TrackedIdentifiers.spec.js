@@ -56,4 +56,17 @@ describe('TrackedIdentifiers.vue', () => {
       done();
     });
   });
+
+  // Assigning 'done' tells the test to wait for us to call 'done()'
+  it('handles error', done => {
+    fetch.mockReject(new Error('Bad gateway'))
+
+    const wrapper = mount(TrackedIdentifiers, { localVue });
+    wrapper.vm.setService('foo-service');
+    process.nextTick(() => {
+      expect(wrapper.emitted()['load-events-error']).toBeTruthy()
+      expect(wrapper.text()).toMatch(/There are no Dependencies for the selected service/);
+      done();
+    });
+  });
 });
