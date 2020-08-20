@@ -35,8 +35,17 @@ export default {
     };
   },
   mounted() {
-    window.$(this.$refs.unusedIdentifierTable.$el).find('.vgt-fixed-header thead tr').append('<tr class="elucidation-header-spacer"/>');
+    const header = this.$refs.unusedIdentifierTable.$el.getElementsByClassName('vgt-fixed-header')[0],
+      tHead = header && header.getElementsByTagName('thead')[0],
+      tr = tHead && tHead.getElementsByTagName('tr')[0],
+      spacer = tr && document.createElement('tr');
+
+    if (spacer) {
+      spacer.classList.add('elucidation-header-spacer');
+      tr.appendChild(spacer);
+    }
   },
+
   methods: {
     getUnusedIdentifiers() {
       return this.rows;

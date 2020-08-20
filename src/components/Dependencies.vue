@@ -2,7 +2,7 @@
   <el-container class="custom-height">
     <el-main>
       <vue-good-table
-        ref="trackedIdentifiersTable"
+        ref="dependenciesTable"
         class="elucidation-vue-good-table"
         :fixed-header="true"
         style="height:180px"
@@ -23,7 +23,7 @@
 import moment from 'moment';
 
 export default {
-  name: 'TrackedIdentifiers',
+  name: 'Dependencies',
   data() {
     return {
       columns: [{
@@ -36,7 +36,7 @@ export default {
         width: '20%'
       }, {
         label: 'Last Observed On',
-        field: 'observedAt',
+        field: 'lastObserved',
         width: '40%',
         formatFn: this.dateFormatFn
       }],
@@ -44,7 +44,7 @@ export default {
     };
   },
   mounted() {
-    const header = this.$refs.trackedIdentifiersTable.$el.getElementsByClassName('vgt-fixed-header')[0],
+    const header = this.$refs.dependenciesTable.$el.getElementsByClassName('vgt-fixed-header')[0],
       tHead = header && header.getElementsByTagName('thead')[0],
       tr = tHead && tHead.getElementsByTagName('tr')[0],
       spacer = tr && document.createElement('tr');
@@ -55,24 +55,37 @@ export default {
     }
   },
   methods: {
-    getConnectionEvents() {
+    clearDependencies() {
+      // To clear the dependencies, simply call 'setServices' with no arguments. This keeps our interface consistent as (a) a Promise
+      // is returned from the call, and (b) all relevant calls in the chain are called as if a parent & child have been provided.
+      return this.setServices();
+    },
+
+    getDependencies() {
       return this.rows;
     },
-    loadConnectionEvents(service) {
-      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/events`)
-        .then((response) => {
-          const json = response.json();
-          return response.ok ? json : Promise.reject(new Error('Error loading Tracked Identifiers'));
-        })
-        .catch((error) => { this.$emit('load-events-error', error); });
+
+    loadDependencies(childService, parentService) {
+      let promise = Promise.resolve([]);
+      if (parentService && childService) {
+        promise = fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${parentService}/relationship/${childService}`)
+          .then((response) => {
+            const json = response.json();
+            return response.ok ? json : Promise.reject(new Error('Error loading Dependencies'));
+          })
+          .catch((error) => { this.$emit('load-dependencies-error', error); });
+      }
+      return promise;
     },
-    setService(service) {
+
+    setServices(child, parent) {
       const mask = this.$loading({ target: this.$el });
-      return this.loadConnectionEvents(service)
-        .then((data) => this.setConnectionEvents(data || []))
+      return this.loadDependencies(child, parent)
+        .then((data) => this.setDependencies(data || []))
         .finally(() => mask.close());
     },
-    setConnectionEvents(events) {
+
+    setDependencies(events) {
       const rows = [];
       events.forEach((event) => {
         let row = rows.find((r) => r.label === event.eventDirection);
@@ -89,6 +102,7 @@ export default {
       });
       this.rows = rows;
     },
+
     dateFormatFn(value) {
       return moment(value).format('MMM Do YYYY HH:mm');
     }

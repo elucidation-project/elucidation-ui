@@ -33,7 +33,7 @@ export default {
   },
   methods: {
     onCurrentChange(selection) {
-      this.$emit('service-selected', selection.name);
+      selection ? this.$emit('service-selected', selection.name) : this.$emit('service-selection-cleared');
     },
     onRefreshList() {
       this.refreshList();
@@ -46,16 +46,12 @@ export default {
           }
           return response.json();
         })
-        .then((data) => this.setServices(data))
-        .catch((error) => {
-          this.$emit('load-services-error', error);
-          this.setServices([]);
-        });
+        .catch((error) => { this.$emit('load-services-error', error); })
+        .then((data) => this.setServices(data || []));
     },
     refreshList() {
       const mask = this.$loading({ target: this.$el });
-      return this.loadServices()
-        .finally(() => mask.close());
+      return this.loadServices().finally(() => mask.close());
     },
     setServices(services) {
       services.sort();

@@ -11,6 +11,7 @@ import 'element-theme-chalk';
 // import the styles
 import 'vue-good-table/dist/vue-good-table.css';
 import './assets/css/main.css';
+import './assets/css/components/Relationships.css';
 
 Vue.config.productionTip = false;
 
@@ -18,9 +19,7 @@ Vue.use(ElementUI);
 Vue.use(VueLodash, { lodash });
 Vue.use(VueGoodTablePlugin);
 
-const $ = require('jquery');
-
-window.$ = $;
+const _ = require('lodash');
 
 new Vue({
   router,
