@@ -1,0 +1,21 @@
+.root-node {
+  x: -160;
+}
+
+.text-node {
+  font-size: .9em;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+
+.rect-node {
+  fill: #b0c4de;
+}
+
+.selected-node {
+  fill: #f0e68c;
+}
