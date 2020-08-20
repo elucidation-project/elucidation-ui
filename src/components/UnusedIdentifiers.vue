@@ -17,8 +17,12 @@
 </template>
 
 <script>
+
+import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
+
 export default {
   name: 'UnusedIdentifiers',
+  mixins: [VueGoodTableSpacer],
   data() {
     return {
       columns: [{
@@ -33,17 +37,6 @@ export default {
       rows: [],
       staticIdentifiers: []
     };
-  },
-  mounted() {
-    const header = this.$refs.unusedIdentifierTable.$el.getElementsByClassName('vgt-fixed-header')[0],
-      tHead = header && header.getElementsByTagName('thead')[0],
-      tr = tHead && tHead.getElementsByTagName('tr')[0],
-      spacer = tr && document.createElement('tr');
-
-    if (spacer) {
-      spacer.classList.add('elucidation-header-spacer');
-      tr.appendChild(spacer);
-    }
   },
 
   methods: {

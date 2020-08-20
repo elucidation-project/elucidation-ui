@@ -20,10 +20,13 @@
 </template>
 
 <script>
+
 import moment from 'moment';
+import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
 
 export default {
   name: 'TrackedIdentifiers',
+  mixins: [VueGoodTableSpacer],
   data() {
     return {
       columns: [{
@@ -43,17 +46,7 @@ export default {
       rows: []
     };
   },
-  mounted() {
-    const header = this.$refs.trackedIdentifiersTable.$el.getElementsByClassName('vgt-fixed-header')[0],
-      tHead = header && header.getElementsByTagName('thead')[0],
-      tr = tHead && tHead.getElementsByTagName('tr')[0],
-      spacer = tr && document.createElement('tr');
 
-    if (spacer) {
-      spacer.classList.add('elucidation-header-spacer');
-      tr.appendChild(spacer);
-    }
-  },
   methods: {
     getConnectionEvents() {
       return this.rows;
