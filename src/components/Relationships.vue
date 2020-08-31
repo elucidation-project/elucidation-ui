@@ -3,9 +3,17 @@
     <el-header class="elucidation-header">
       <span>Relationships</span>
     </el-header>
-    <el-main>
-      <svg width="100%" viewBox="0 0 1000 1000">
-      </svg>
+    <el-main style="overflow:hidden">
+      <div class="elucidation-relationships-container">
+        <div class="elucidation-relationships-svg">
+          <svg width="100%" viewBox="0 0 1000 1000"> </svg>
+        </div>
+        <div class="elucidation-relationships-toolbar">
+          <el-tooltip content="Reset Display" placement="right">
+            <el-button icon="el-icon-s-home" @click="onGoHome" style="position:inherit;font-size:2em;padding:2px"></el-button>
+          </el-tooltip>
+        </div>
+      </div>
     </el-main>
   </el-container>
 </template>
@@ -21,19 +29,32 @@ window.d3 = d3;
 export default {
   name: 'Relationships',
   data() {
-    return { relationships: [], nodeIdCtr: 1 };
+    return {
+      relationships: [],
+      nodeIdCtr: 1,
+      rectOffset: 180,
+      transitionDuration: 750
+    };
   },
   mounted() {
     this.$nextTick(() => {
       this.canvas = d3.select('svg')
         .append('g')
-        .classed('canvas', true)
-        .attr('transform', 'translate(180, 20)');
+        .classed('canvas', true);
+
+      this.zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', () => {
+          this.canvas.attr('transform', d3.event.transform);
+        });
+
+      d3.select('svg').call(this.zoom);
     });
   },
+
   methods: {
     loadRelationships(service) {
-      let promise = Promise.resolve([]);
+      let promise = Promise.resolve({});
       if (service) {
         promise = fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${service}/relationships`)
           .then((response) => {
@@ -42,17 +63,34 @@ export default {
             }
             return response.json();
           })
+          .then((relationships) => {
+            relationships && relationships.children && relationships.children.sort((a, b) => {
+              const nameA = _.startCase(a.serviceName),
+                nameB = _.startCase(b.serviceName);
+              return nameA.localeCompare(nameB);
+            });
+            return relationships;
+          })
           .catch((error) => { this.$emit('load-services-error', error); });
       }
       return promise;
     },
+
+    onGoHome() {
+      d3.select('svg')
+        .transition()
+        .duration(this.transitionDuration)
+        .call(this.zoom.transform, d3.zoomIdentity);
+    },
+
     setService(service) {
       const mask = this.$loading({ target: this.$el });
       return this.loadRelationships(service)
-        .then((data) => this.setRelationships(data || []))
+        .then((data) => this.setRelationships(data))
         .finally(() => mask.close());
     },
-    setRelationships(relationships) {
+
+    setRelationships(relationships = {}) {
       const width = 960,
         height = 500;
 
@@ -62,7 +100,7 @@ export default {
       this.canvas.selectAll('g.node').remove();
       this.canvas.selectAll('path.link').remove();
 
-      if (this.relationships.length === 0) {
+      if (!this.relationships.children || this.relationships.children.length === 0) {
         return;
       }
 
@@ -77,7 +115,7 @@ export default {
         .attr('markerUunits', 'userSpaceOnUse');
 
       defs.select('#inbound-pointer')
-         .append('polygon')
+        .append('polygon')
         .classed('elucidation-pointer', true)
         .attr('points', '0,5,10,0 10,11');
 
@@ -111,54 +149,83 @@ export default {
       }
     },
 
-    update(source) {
-      // Assigns the x and y position for the nodes
+    onClick(g, n) {
+      const childService = n.data.serviceName,
+        parentService = n.parent && n.parent.data.serviceName;
+
+      d3.selectAll('rect.selected-node').classed('selected-node', false);
+      d3.select(g).select('rect.rect-node').classed('selected-node', true);
+      this.$emit('service-selected', childService, parentService);
+    },
+
+    onDoubleClick(g, d) {
       const me = this,
-        i = 0,
+        expandedNodeClassName = `expanded-node-${d.depth}`;
+
+      // Suspend the pan/zoom while we add/remove items, else it zooms in multiple times
+      d3.select('svg').on('.zoom', null);
+      if (d.children) {
+        d.children = null;
+        this.update(d);
+        // Re-enable the pan/zoom
+        d3.select('svg').call(this.zoom);
+      } else {
+        this.canvas.selectAll(`g.${expandedNodeClassName}`)
+          .each(function(expanded) {
+            expanded.children = null;
+            me.update(expanded);
+            d3.select(this).classed(expandedNodeClassName, false);
+          });
+        d3.select(g).classed(expandedNodeClassName, true);
+        this.loadRelationships(d.data.serviceName).then((serviceRelationship) => {
+          const newHierarchyChildren = [],
+            kids = d.data.children = serviceRelationship.children;
+
+          if (kids.length === 0) {
+            this.$alert(`${_.startCase(d.data.serviceName)} has no dependencies.`, 'Notice', {
+              confirmButtonText: 'Ok'
+            });
+            return;
+          }
+          kids.forEach((kid) => {
+            const newNode = d3.hierarchy(kid);
+            newNode.depth = d.depth + 1; // update depth depends on parent
+            newNode.height = d.height;
+            newNode.parent = d; // set parent
+            newNode.id = null; // String(++i);
+            newHierarchyChildren.push(newNode);
+          });
+          d.children = newHierarchyChildren;
+          d._children = newHierarchyChildren;
+          this.update(d);
+          // Re-enable the pan/zoom
+          d3.select('svg').call(this.zoom);
+        });
+      }
+    },
+    // Creates a curved (diagonal) path from parent to the child nodes
+    diagonal(s, d) {
+      const path = `M ${s.y + this.rectOffset} ${s.x}
+              C ${((s.y + d.y) / 2) + this.rectOffset} ${s.x},
+                ${((s.y + d.y) / 2) + this.rectOffset} ${d.x},
+                ${d.y + this.rectOffset} ${d.x}`;
+
+      return path;
+    },
+
+    update(source) {
+      const me = this, // We need 'me' because of node selection issues. See NOTE in click listeners
         rectHeight = 50,
         rectWidth = 160,
         treeData = this.treemap(this.root),
-        // Creates a curved (diagonal) path from parent to the child nodes
-        diagonal = function(s, d) {
-          const path = `M ${s.y} ${s.x}
-                  C ${(s.y + d.y) / 2} ${s.x},
-                    ${(s.y + d.y) / 2} ${d.x},
-                    ${d.y} ${d.x}`;
-
-          return path;
-        },
-        // Toggle children on click.
-        onDoubleClick = function(d) {
-          if (d.children) {
-            d.children = null;
-            this.update(d);
-          } else {
-            this.loadRelationships(d.data.serviceName).then((serviceRelationship) => {
-              const newHierarchyChildren = [];
-              const kids = d.data.children = serviceRelationship.children;
-              kids.forEach((kid) => {
-                const newNode = d3.hierarchy(kid);
-                newNode.depth = d.depth + 1; // update depth depends on parent
-                newNode.height = d.height;
-                newNode.parent = d; // set parent
-                newNode.id = null; // String(++i);
-                newHierarchyChildren.push(newNode);
-              });
-              d.children = newHierarchyChildren;
-              d._children = newHierarchyChildren;
-              this.update(d);
-            });
-          }
-        };
-
-      // Compute the new tree layout.
-      const nodes = treeData.descendants(),
+        // Compute the new tree layout.
+        nodes = treeData.descendants(),
         links = treeData.descendants().slice(1);
 
       // Normalize for fixed-depth.
       nodes.forEach((d) => {
         const offset = d.parent ? d.depth-1 : 0;
-        d.y = d.depth * 180 + (offset*rectWidth);
+        d.y = d.depth * this.rectOffset + (offset*rectWidth);
       });
 
       // ****************** Nodes section ***************************
@@ -170,22 +237,23 @@ export default {
       // Enter any new modes at the parent's previous position.
       const nodeEnter = node.enter().append('g')
         .attr('class', 'node')
-        .attr('transform', (d) => `translate(${source.y0},${source.x0})`)
-        .on('click', function onClick(n) {
-          const childService = n.data.serviceName,
-            parentService = n.parent && n.parent.data.serviceName;
-
-          d3.selectAll('rect.selected-node').classed('selected-node', false);
-          d3.select(this).select('rect.rect-node').classed('selected-node', true);
-          me.$emit('service-selected', childService, parentService);
+        .attr('transform', (d) => `translate(${source.y0+this.rectOffset},${source.x0})`)
+        // NOTE: We do the listeners this way because the 'g' element is 'this' in the callback, and we need access to it so we can
+        // perform actions on it (e.g., add the 'expanded' class to it).
+        // There doesn't seem to be an easy way to get the 'g' element responsible for the click actions any other way.
+        .on('click', function _click(n) {
+          // 'this' is the 'g' element.
+          me.onClick(this, n);
         })
-        .on('dblclick', onDoubleClick.bind(this));
+        .on('dblclick', function _doubleClick(d) {
+          // 'this' is the 'g' element.
+          me.onDoubleClick(this, d);
+        });
 
       // Add Circle for the nodes
       nodeEnter.append('rect')
         .attr('class', 'node')
         .attr('height', 0);
-        // .style('fill', (d) => (d._children ? 'lightsteelblue' : '#fff'));
 
       // Add labels for the nodes
       nodeEnter.append('text')
@@ -199,11 +267,10 @@ export default {
       // UPDATE
       const nodeUpdate = nodeEnter.merge(node);
 
-      const duration = 750;
       // Transition to the proper position for the node
       nodeUpdate.transition()
-        .duration(duration)
-        .attr('transform', (d) => `translate(${d.y},${d.x-(rectHeight/2)})`);
+        .duration(this.transitionDuration)
+        .attr('transform', (d) => `translate(${d.y+this.rectOffset},${d.x-(rectHeight/2)})`);
 
       // Update the node attributes and style
       nodeUpdate.select('rect.node')
@@ -212,7 +279,6 @@ export default {
         .attr('rx', 10)
         .attr('ry', 10)
         .attr('class', (n) => (n.parent ? 'rect-node' : 'root-node rect-node'))
-        // .style('fill', 'lightsteelblue')
         .attr('cursor', 'pointer');
 
       // Remove any exiting nodes
@@ -229,7 +295,7 @@ export default {
         .attr('class', 'link')
         .attr('d', (d) => {
           const o = { x: source.x0, y: source.y0 };
-          return diagonal(o, o);
+          return this.diagonal(o, o);
         });
 
       // UPDATE
@@ -237,18 +303,18 @@ export default {
 
       // Transition back to the parent element position
       linkUpdate.transition()
-        .duration(duration)
+        .duration(this.transitionDuration)
         .attr('d', (d) => {
           const f = { x: d.parent.x, y: d.parent.y + (d.depth === 1 ? 0 : rectWidth) };
-          return diagonal(d, f);
+          return this.diagonal(d, f);
         });
 
       // Remove any exiting links
       const linkExit = link.exit().transition()
-        .duration(duration)
+        .duration(this.transitionDuration)
         .attr('d', (d) => {
           const o = { x: source.x, y: source.y };
-          return diagonal(o, o);
+          return this.diagonal(o, o);
         })
         .remove();
 
@@ -260,11 +326,10 @@ export default {
     },
 
     removeNodes(source, node) {
-      const duration = 750;
       // Remove any exiting nodes
       const nodeExit = node.exit().transition()
-        .duration(duration)
-        .attr('transform', (d) => `translate(${source.y},${source.x})`)
+        .duration(this.transitionDuration)
+        .attr('transform', (d) => `translate(${source.y+this.rectOffset},${source.x})`)
         .remove();
 
       // On exit reduce the node rects size to 0
