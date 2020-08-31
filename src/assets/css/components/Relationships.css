@@ -19,3 +19,24 @@
 .selected-node {
   fill: #f0e68c;
 }
+
+.elucidation-relationships-container {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.elucidation-relationships-container .elucidation-relationships-svg {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.elucidation-relationships-container .elucidation-relationships-toolbar {
+  position: absolute;
+  display: flex;
+  top: 5px;
+  left: 5px;
+}
