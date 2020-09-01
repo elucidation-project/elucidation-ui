@@ -15,7 +15,6 @@ describe('Relationships.vue', () => {
     fetch.resetMocks();
   });
 
-  // Assigning 'done' tells the test to wait for us to call 'done()'
   describe('successful tests', () => {
     beforeEach(() => {
       fetch.mockResponse(JSON.stringify({
@@ -36,6 +35,7 @@ describe('Relationships.vue', () => {
       }));
     });
 
+    // Assigning 'done' tells the test to wait for us to call 'done()'
     it('loads relationships', (done) => {
       const wrapper = mount(Relationships, { localVue });
       wrapper.vm.setService('canary-service');

@@ -104,8 +104,6 @@ export default {
               const nameA = _.startCase(a.serviceName),
                 nameB = _.startCase(b.serviceName);
 
-              a.hasInbound = true;
-              a.hasOutbound = true;
               return nameA.localeCompare(nameB);
             });
             return relationships;
