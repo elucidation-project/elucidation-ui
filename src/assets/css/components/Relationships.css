@@ -1,5 +1,5 @@
 .root-node {
-  x: -160;
+  x: -160px;
 }
 
 .text-node {
@@ -39,4 +39,16 @@
   display: flex;
   top: 5px;
   left: 5px;
+}
+
+.elucidation-relationships-svg .elucidation-hidden {
+  display: none;
+}
+
+.elucidation-relationships-svg .elucidation-inbound-pointer {
+  fill: #f00;
+}
+
+.elucidation-relationships-svg .elucidation-outbound-pointer {
+  fill: #00f;
 }
