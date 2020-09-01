@@ -10,6 +10,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "core-js": "^3.6.5",
     "d3": "^5.16.0",
     "element-theme-chalk": "^2.13.2",

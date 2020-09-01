@@ -32,7 +32,9 @@ export default {
     return {
       relationships: [],
       nodeIdCtr: 1,
+      rectHeight: 50,
       rectOffset: 180,
+      rectWidth: 160,
       transitionDuration: 750
     };
   },
@@ -49,10 +51,44 @@ export default {
         });
 
       d3.select('svg').call(this.zoom);
+
+      const defs = this.canvas.append('defs');
+
+      defs.append('marker')
+        .classed('elucidation-inbound-pointer', true)
+        .attr('id', 'inbound-pointer')
+        .attr('markerWidth', '16')
+        .attr('markerHeight', '11')
+        .attr('refX', '16')
+        .attr('refY', '5')
+        .attr('markerUnits', 'userSpaceOnUse');
+
+      defs.select('#inbound-pointer')
+        .append('polygon')
+        .classed('elucidation-pointer', true)
+        .attr('points', '0,5 10,0 10,11');
+
+      defs.append('marker')
+        .classed('elucidation-outbound-pointer', true)
+        .attr('id', 'outbound-pointer')
+        .attr('markerWidth', '16')
+        .attr('markerHeight', '11')
+        .attr('refX', '16')
+        .attr('refY', '5')
+        .attr('markerUnits', 'userSpaceOnUse');
+
+      defs.select('#outbound-pointer')
+        .append('polygon')
+        .classed('elucidation-pointer', true)
+        .attr('points', '0,0 0,11, 11,5');
     });
   },
 
   methods: {
+    getRelationships() {
+      return this.relationships;
+    },
+
     loadRelationships(service) {
       let promise = Promise.resolve({});
       if (service) {
@@ -67,11 +103,12 @@ export default {
             relationships && relationships.children && relationships.children.sort((a, b) => {
               const nameA = _.startCase(a.serviceName),
                 nameB = _.startCase(b.serviceName);
+
               return nameA.localeCompare(nameB);
             });
             return relationships;
           })
-          .catch((error) => { this.$emit('load-services-error', error); });
+          .catch((error) => { this.$emit('load-relationships-error', error); });
       }
       return promise;
     },
@@ -98,27 +135,11 @@ export default {
 
       // Remove all existing elements
       this.canvas.selectAll('g.node').remove();
-      this.canvas.selectAll('path.link').remove();
+      this.canvas.selectAll('g.link').remove();
 
       if (!this.relationships.children || this.relationships.children.length === 0) {
         return;
       }
-
-      const defs = this.canvas.append('defs');
-      defs.append('marker')
-        .classed('elucidation-inbound-pointer', true)
-        .attr('id', 'inbound-pointer')
-        .attr('markerWidth', '16')
-        .attr('markerHeight', '11')
-        .attr('refX', '16')
-        .attr('refY', '5')
-        .attr('markerUunits', 'userSpaceOnUse');
-
-      defs.select('#inbound-pointer')
-        .append('polygon')
-        .classed('elucidation-pointer', true)
-        .attr('points', '0,5,10,0 10,11');
-
       // declares a tree layout and assigns the size
       this.treemap = d3.tree().size([height, width]);
 
@@ -160,15 +181,16 @@ export default {
 
     onDoubleClick(g, d) {
       const me = this,
+        svg = d3.select('svg'),
         expandedNodeClassName = `expanded-node-${d.depth}`;
 
       // Suspend the pan/zoom while we add/remove items, else it zooms in multiple times
-      d3.select('svg').on('.zoom', null);
+      svg.on('.zoom', null);
       if (d.children) {
         d.children = null;
         this.update(d);
-        // Re-enable the pan/zoom
-        d3.select('svg').call(this.zoom);
+        // Re-enable the pan/zoom. A bit of a hack, but we need to wait a second or else it zooms in right away.
+        d3.timer(() => svg.call(this.zoom));
       } else {
         this.canvas.selectAll(`g.${expandedNodeClassName}`)
           .each(function(expanded) {
@@ -199,7 +221,7 @@ export default {
           d._children = newHierarchyChildren;
           this.update(d);
           // Re-enable the pan/zoom
-          d3.select('svg').call(this.zoom);
+          svg.call(this.zoom);
         });
       }
     },
@@ -214,21 +236,32 @@ export default {
     },
 
     update(source) {
-      const me = this, // We need 'me' because of node selection issues. See NOTE in click listeners
-        rectHeight = 50,
-        rectWidth = 160,
-        treeData = this.treemap(this.root),
+      const treeData = this.treemap(this.root),
         // Compute the new tree layout.
         nodes = treeData.descendants(),
         links = treeData.descendants().slice(1);
 
+      this.addNodes(source, nodes);
+      this.addLinks(source, links);
+
+      // Store the old positions for transition.
+      nodes.forEach((d) => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+      });
+      this.$emit('rendered', this, this.canvas);
+    },
+
+    // ****************** Nodes section ***************************
+    addNodes(source, nodes) {
+      // We need 'me' because of node selection issues. See NOTE in click listeners
+      const me = this;
+
       // Normalize for fixed-depth.
       nodes.forEach((d) => {
         const offset = d.parent ? d.depth-1 : 0;
-        d.y = d.depth * this.rectOffset + (offset*rectWidth);
+        d.y = d.depth * this.rectOffset + (offset*this.rectWidth);
       });
-
-      // ****************** Nodes section ***************************
 
       // Update the nodes...
       const node = this.canvas.selectAll('g.node')
@@ -259,7 +292,7 @@ export default {
       nodeEnter.append('text')
         .classed('text-node', true)
         .attr('dy', '.35em')
-        .attr('y', rectHeight/2)
+        .attr('y', this.rectHeight/2)
         .attr('x', (d) => (d.children || d._children ? -150 : 10))
         .attr('text-anchor', 'start')
         .text((d) => _.startCase(d.data.serviceName));
@@ -270,12 +303,12 @@ export default {
       // Transition to the proper position for the node
       nodeUpdate.transition()
         .duration(this.transitionDuration)
-        .attr('transform', (d) => `translate(${d.y+this.rectOffset},${d.x-(rectHeight/2)})`);
+        .attr('transform', (d) => `translate(${d.y+this.rectOffset},${d.x-(this.rectHeight/2)})`);
 
       // Update the node attributes and style
       nodeUpdate.select('rect.node')
         .attr('width', 160)
-        .attr('height', rectHeight)
+        .attr('height', this.rectHeight)
         .attr('rx', 10)
         .attr('ry', 10)
         .attr('class', (n) => (n.parent ? 'rect-node' : 'root-node rect-node'))
@@ -283,46 +316,62 @@ export default {
 
       // Remove any exiting nodes
       this.removeNodes(source, node);
+    },
 
-      // ****************** links section ***************************
+    // ****************** links section ***************************
+    addLinks(source, links) {
+      // We need 'me' because of link selection issues. See NOTE in node click listeners above
+      const me = this;
 
-      // Update the links...
-      const link = this.canvas.selectAll('path.link')
+      const link = this.canvas.selectAll('g.link')
         .data(links, (d) => d.id);
 
-      // Enter any new links at the parent's previous position.
-      const linkEnter = link.enter().insert('path', 'g')
-        .attr('class', 'link')
+      const g = link.enter().insert('g', 'g.node')
+        .attr('class', 'link');
+
+      g.insert('path')
+        .classed('inbound-path', true)
+        .classed('elucidation-hidden', (d) => !d.data.hasInbound)
         .attr('d', (d) => {
-          const o = { x: source.x0, y: source.y0 };
+          const offset = d.data.hasInbound ? 10 : 0,
+            o = { x: source.x0, y: source.y0 + offset };
           return this.diagonal(o, o);
-        });
+        })
+        .attr('marker-start', 'url(#inbound-pointer)');
+
+      g.insert('path')
+        .classed('outbound-path', true)
+        .classed('elucidation-hidden', (d) => !d.data.hasOutbound)
+        .attr('d', (d) => {
+          const offset = d.data.hasInbound ? -10 : 0,
+            o = { x: source.x0, y: source.y0 + offset };
+          return this.diagonal(o, o);
+        })
+        .attr('marker-start', 'url(#outbound-pointer)');
 
       // UPDATE
-      const linkUpdate = linkEnter.merge(link);
-
       // Transition back to the parent element position
+      const linkUpdate = this.canvas.selectAll('path').merge(link);
       linkUpdate.transition()
         .duration(this.transitionDuration)
-        .attr('d', (d) => {
-          const f = { x: d.parent.x, y: d.parent.y + (d.depth === 1 ? 0 : rectWidth) };
-          return this.diagonal(d, f);
+        .attr('d', function _transitionLink(d) {
+          const begin = { x: d.x, y: d.y },
+            end = { x: d.parent.x, y: d.parent.y + (d.depth === 1 ? 0 : me.rectWidth) },
+            offset = 10 * (this.getAttribute('class').match(/inbound/) ? 1 : -1);
+
+          d.data.hasInbound && d.data.hasOutbound && (begin.x += offset);
+          return me.diagonal(begin, end);
         });
 
       // Remove any exiting links
-      const linkExit = link.exit().transition()
+      const linkExit = link.exit();
+      linkExit.selectAll('path').transition()
         .duration(this.transitionDuration)
         .attr('d', (d) => {
           const o = { x: source.x, y: source.y };
           return this.diagonal(o, o);
-        })
-        .remove();
-
-      // Store the old positions for transition.
-      nodes.forEach((d) => {
-        d.x0 = d.x;
-        d.y0 = d.y;
-      });
+        });
+      linkExit.remove();
     },
 
     removeNodes(source, node) {
