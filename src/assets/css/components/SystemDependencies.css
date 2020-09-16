@@ -1,0 +1,47 @@
+.root-node {
+  x: -160px;
+}
+
+.text-node {
+  font-size: .9em;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+
+.rect-node {
+  fill: #b0c4de;
+}
+
+.selected-node {
+  fill: #f0e68c;
+}
+
+.elucidation-system-dependencies-container {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.elucidation-system-dependencies-container .elucidation-system-dependencies-svg {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.elucidation-system-dependencies-container .elucidation-system-dependencies-toolbar {
+  position: absolute;
+  display: flex;
+  top: 5px;
+  left: 5px;
+}
+
+.elucidation-system-dependencies .elucidation-system-dependencies-svg .chord-title {
+  fill: #fff;
+  font-size: 1.5em;
+}

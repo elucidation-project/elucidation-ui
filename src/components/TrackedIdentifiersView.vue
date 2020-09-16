@@ -25,7 +25,7 @@ import moment from 'moment';
 import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
 
 export default {
-  name: 'TrackedIdentifiers',
+  name: 'TrackedIdentifiersView',
   mixins: [VueGoodTableSpacer],
   data() {
     return {

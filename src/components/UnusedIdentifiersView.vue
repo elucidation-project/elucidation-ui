@@ -19,9 +19,11 @@
 <script>
 
 import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
+import UnusedIdentifier from '../models/UnusedIdentifier';
+import UnusedIdentifiers from '../collections/UnusedIdentifiers';
 
 export default {
-  name: 'UnusedIdentifiers',
+  name: 'UnusedIdentifiersView',
   mixins: [VueGoodTableSpacer],
   data() {
     return {
@@ -35,7 +37,8 @@ export default {
         width: '50%'
       }],
       rows: [],
-      staticIdentifiers: []
+      staticIdentifiers: [],
+      unusedIdentifiers: new UnusedIdentifiers()
     };
   },
 
@@ -44,24 +47,25 @@ export default {
       return this.rows;
     },
     loadUnusedIdentifiers(service) {
-      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/connectionIdentifier/${service}/unused`)
-        .then((response) => {
-          const json = response.json();
-          return response.ok ? json : Promise.reject(new Error('Error loading Unused Identifiers'));
-        })
+      this.unusedIdentifiers.clear();
+      this.unusedIdentifiers.set('serviceName', service);
+      return this.unusedIdentifiers.fetch()
+        .then() // nothing...
         .catch((error) => { this.$emit('load-unused-identifiers-error', error); });
     },
     setService(service) {
       const mask = this.$loading({ target: this.$el });
       return this.loadUnusedIdentifiers(service)
-        .then((data) => {
-          const identifiers = data && data.identifiers ? data.identifiers : [];
-          this.setUnusedIdentifiers(identifiers);
+        .then(() => {
+          // const identifiers = data && data.identifiers ? data.identifiers : [];
+          this.setUnusedIdentifiers(this.unusedIdentifiers);//.attributes);
         })
         .finally(() => mask.close());
     },
     setUnusedIdentifiers(identifiers) {
-      this.rows = identifiers;
+      const rows = [];
+      identifiers.each((identifier) => rows.push(identifier.attributes));
+      this.rows = rows;
     }
   }
 };

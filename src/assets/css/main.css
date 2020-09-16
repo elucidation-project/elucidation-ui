@@ -32,8 +32,25 @@ body, html {
   padding: 5px;
 }
 
-.el-container.elucidation-center {
-  padding: 0 0 2px 5px;
+.el-main.elucidation-center {
+  display: flex;
+  padding: 0;
+}
+
+.el-tabs.elucidation-center-tabs {
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 2;
+  height: 100%;
+}
+
+.el-tabs.elucidation-center-tabs .el-tabs__content{
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 0;
 }
 
 .el-container:not(.custom-height) {
@@ -72,7 +89,18 @@ body, html {
   padding: 6px 0;
 }
 
+.el-tab-pane.elucidation-relationships,
+.el-tab-pane.elucidation-system-dependencies {
+  flex: 1;
+}
+
+.el-tab-pane.elucidation-relationships .elucidation-relationships-container,
+.el-tab-pane.elucidation-system-dependencies .elucidation-system-dependencies-container {
+  background: #777;
+}
+
 .elucidation-center .elucidation-relationships,
+.elucidation-center .elucidation-system-dependencies,
 .elucidation-left .el-container {
   padding: 0;
 }
