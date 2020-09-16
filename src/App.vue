@@ -2,8 +2,13 @@
   <div id="app" class="elucidation">
     <el-container>
       <el-main class="elucidation-center">
-        <el-tabs type="border-card" class="elucidation-center-tabs">
-          <el-tab-pane label="System Dependencies" class="elucidation-system-dependencies" :lazy="true">
+        <el-tabs
+            type="border-card"
+            ref="tabContainer"
+            value="systemDependencies"
+            class="elucidation-center-tabs"
+            @tab-click="onTabSelected">
+          <el-tab-pane label="System Dependencies" name="systemDependencies" class="elucidation-system-dependencies">
             <el-container>
               <el-main>
                 <system-dependencies-view
@@ -13,7 +18,7 @@
               </el-main>
             </el-container>
           </el-tab-pane>
-          <el-tab-pane label="Relationships" class="elucidation-relationships">
+          <el-tab-pane label="Relationships" name="relationships" class="elucidation-relationships">
             <el-container>
               <el-aside class="elucidation-left">
                 <service-list-view
@@ -85,7 +90,11 @@ export default {
       // This method may get called multiple times during a single expand/collapse, to set a short timeout so we reduce the number of calls
       // down to (possibly) 1.
       window.clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = window.setTimeout(() => this.$refs.systemDependencies && this.$refs.systemDependencies.refresh(), 50);
+      this.resizeTimeout = window.setTimeout(() => {
+        const tabContainer = this.$refs.tabContainer,
+          systemDependencies = this.$refs.systemDependencies;
+        (tabContainer.currentName === 'systemDependencies') && systemDependencies && systemDependencies.refresh();
+      }, 50);
     });
     observer.observe(this.$refs.collapseContainer.$el);
   },
@@ -109,6 +118,9 @@ export default {
     onServiceSelected(selection) {
       this.$refs.relationships.setService(selection);
       this.$refs.dependencies.setServices();
+    },
+    onTabSelected(tab) {
+      tab.name === 'systemDependencies' && this.$nextTick(() => this.$refs.systemDependencies.refresh());
     }
   }
 };
