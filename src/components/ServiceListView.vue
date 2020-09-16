@@ -12,9 +12,9 @@
         empty-text="There are no Services"
         :show-header=false
         @current-change="onCurrentChange"
-        :data="services" height="100%" style="width: 100%">
+        :data="rows" height="100%" style="width: 100%">
 
-        <el-table-column prop="name" :formatter="(row, col, val) => _.startCase(val)">
+        <el-table-column prop="serviceName" :formatter="(row, col, val) => _.startCase(val)">
         </el-table-column>
       </el-table>
     </el-main>
@@ -23,40 +23,39 @@
 
 <script>
 
+import Service from '../models/Service';
+import Services from '../collections/Services';
+
 export default {
-  name: 'ServiceList',
+  name: 'ServiceListView',
   data() {
-    return { services: [] };
+    return {
+      rows: [],
+      services: new Services()
+    };
   },
   mounted() {
     this.loadServices();
   },
   methods: {
     onCurrentChange(selection) {
-      selection ? this.$emit('service-selected', selection.name) : this.$emit('service-selection-cleared');
+      selection ? this.$emit('service-selected', selection.serviceName) : this.$emit('service-selection-cleared');
     },
     onRefreshList() {
       this.refreshList();
     },
     loadServices() {
-      return fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/services`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Error loading services');
-          }
-          return response.json();
-        })
-        .catch((error) => { this.$emit('load-services-error', error); })
-        .then((data) => this.setServices(data || []));
+      return this.services.fetch()
+        .then(this._refreshView.bind(this))
+        .catch((error) => { this.$emit('load-services-error', error); });
     },
     refreshList() {
       const mask = this.$loading({ target: this.$el });
       return this.loadServices().finally(() => mask.close());
     },
-    setServices(services) {
-      services.sort();
-      this.services.length = 0;
-      services.forEach((service) => this.services.push({ name: service }));
+    _refreshView() {
+      this.rows.length = 0;
+      this.services.each((service) => this.rows.push(service.attributes));
     }
   }
 };

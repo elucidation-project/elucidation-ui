@@ -6,7 +6,7 @@
     <el-main style="overflow:hidden">
       <div class="elucidation-relationships-container">
         <div class="elucidation-relationships-svg">
-          <svg width="100%" viewBox="0 0 1000 1000"> </svg>
+          <svg id='relationships_svg' width="100%" viewBox="0 0 1000 1000"> </svg>
         </div>
         <div class="elucidation-relationships-toolbar">
           <el-tooltip content="Reset Display" placement="right">
@@ -27,7 +27,7 @@ import _ from 'lodash';
 window.d3 = d3;
 
 export default {
-  name: 'Relationships',
+  name: 'RelationshipsView',
   data() {
     return {
       relationships: [],
@@ -39,8 +39,9 @@ export default {
     };
   },
   mounted() {
+    this.svg = d3.select('svg#relationships_svg');
     this.$nextTick(() => {
-      this.canvas = d3.select('svg')
+      this.canvas = this.svg
         .append('g')
         .classed('canvas', true);
 
@@ -50,7 +51,7 @@ export default {
           this.canvas.attr('transform', d3.event.transform);
         });
 
-      d3.select('svg').call(this.zoom);
+      this.svg.call(this.zoom);
 
       const defs = this.canvas.append('defs');
 
@@ -114,7 +115,7 @@ export default {
     },
 
     onGoHome() {
-      d3.select('svg')
+      this.svg
         .transition()
         .duration(this.transitionDuration)
         .call(this.zoom.transform, d3.zoomIdentity);
@@ -181,16 +182,15 @@ export default {
 
     onDoubleClick(g, d) {
       const me = this,
-        svg = d3.select('svg'),
         expandedNodeClassName = `expanded-node-${d.depth}`;
 
       // Suspend the pan/zoom while we add/remove items, else it zooms in multiple times
-      svg.on('.zoom', null);
+      this.svg.on('.zoom', null);
       if (d.children) {
         d.children = null;
         this.update(d);
         // Re-enable the pan/zoom. A bit of a hack, but we need to wait a second or else it zooms in right away.
-        d3.timer(() => svg.call(this.zoom));
+        d3.timer(() => this.svg.call(this.zoom));
       } else {
         this.canvas.selectAll(`g.${expandedNodeClassName}`)
           .each(function(expanded) {
@@ -221,7 +221,7 @@ export default {
           d._children = newHierarchyChildren;
           this.update(d);
           // Re-enable the pan/zoom
-          svg.call(this.zoom);
+          this.svg.call(this.zoom);
         });
       }
     },

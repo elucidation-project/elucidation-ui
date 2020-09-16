@@ -12,6 +12,7 @@ import 'element-theme-chalk';
 import 'vue-good-table/dist/vue-good-table.css';
 import './assets/css/main.css';
 import './assets/css/components/Relationships.css';
+import './assets/css/components/SystemDependencies.css';
 
 Vue.config.productionTip = false;
 

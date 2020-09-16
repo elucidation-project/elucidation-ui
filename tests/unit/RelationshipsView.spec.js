@@ -2,7 +2,7 @@ import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 
 import Vue from 'vue';
 import ElementUI from 'element-ui';
-import Relationships from '@/components/Relationships.vue';
+import RelationshipsView from '@/components/RelationshipsView.vue';
 import VueLodash from 'vue-lodash';
 import lodash from 'lodash';
 
@@ -10,7 +10,7 @@ const localVue = createLocalVue();
 localVue.use(ElementUI);
 localVue.use(VueLodash, { lodash });
 
-describe('Relationships.vue', () => {
+describe('RelationshipsView.vue', () => {
   beforeAll(() => {
     fetch.resetMocks();
   });
@@ -37,7 +37,7 @@ describe('Relationships.vue', () => {
 
     // Assigning 'done' tells the test to wait for us to call 'done()'
     it('loads relationships', (done) => {
-      const wrapper = mount(Relationships, { localVue });
+      const wrapper = mount(RelationshipsView, { localVue });
       wrapper.vm.setService('canary-service');
       process.nextTick(() => {
         const relationships = wrapper.vm.getRelationships();
@@ -48,7 +48,7 @@ describe('Relationships.vue', () => {
     });
 
     it('generates SVG', (done) => {
-      const wrapper = mount(Relationships, { localVue });
+      const wrapper = mount(RelationshipsView, { localVue });
       wrapper.vm.$on('rendered', (me, canvas) => {
         // TODO: Figure out how to check the contents of the SVG 'canvas' (which is a 'g'). For some reason, jest isn't fully rendering
         // the SVG elements, so 'canvas.selectAll("g.link").size()' returns 0. I've put breakpoints in the code within a browser session
@@ -65,7 +65,7 @@ describe('Relationships.vue', () => {
   it('handles error', (done) => {
     fetch.mockReject(new Error('Bad gateway'));
 
-    const wrapper = mount(Relationships, { localVue });
+    const wrapper = mount(RelationshipsView, { localVue });
     wrapper.vm.setService('canary-service');
     process.nextTick(() => {
       expect(wrapper.emitted()['load-relationships-error']).toBeTruthy();

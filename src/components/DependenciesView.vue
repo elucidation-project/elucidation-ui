@@ -23,9 +23,11 @@
 
 import moment from 'moment';
 import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
+import ServiceDependency from '../models/ServiceDependency';
+import ServiceDependencies from '../collections/ServiceDependencies';
 
 export default {
-  name: 'Dependencies',
+  name: 'DependenciesView',
   mixins: [VueGoodTableSpacer],
   data() {
     return {
@@ -43,7 +45,8 @@ export default {
         width: '40%',
         formatFn: this.dateFormatFn
       }],
-      rows: []
+      rows: [],
+      dependencies: new ServiceDependencies()
     };
   },
 
@@ -61,12 +64,12 @@ export default {
     loadDependencies(childService, parentService) {
       let promise = Promise.resolve([]);
       if (parentService && childService) {
-        promise = fetch(`${process.env.VUE_APP_BASE_URL}/elucidate/service/${parentService}/relationship/${childService}`)
-          .then((response) => {
-            const json = response.json();
-            return response.ok ? json : Promise.reject(new Error('Error loading Dependencies'));
-          })
+        this.dependencies.set({ parentService, childService });
+        promise = this.dependencies.fetch()
+          .then() // nothing...
           .catch((error) => { this.$emit('load-dependencies-error', error); });
+      } else {
+        this.dependencies.clear();
       }
       return promise;
     },
@@ -78,9 +81,9 @@ export default {
         .finally(() => mask.close());
     },
 
-    setDependencies(events) {
+    setDependencies() {
       const rows = [];
-      events.forEach((event) => {
+      this.dependencies.each((event) => {
         let row = rows.find((r) => r.label === event.eventDirection);
         if (!row) {
           row = {
@@ -91,7 +94,7 @@ export default {
           };
           rows.push(row);
         }
-        row.children.push(event);
+        row.children.push(event.attributes);
       });
       this.rows = rows;
     },

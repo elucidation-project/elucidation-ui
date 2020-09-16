@@ -10,17 +10,23 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@observablehq/stdlib": "^3.3.2",
+    "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
     "core-js": "^3.6.5",
     "d3": "^5.16.0",
+    "d3-chord": "^2.0.0",
     "element-theme-chalk": "^2.13.2",
     "element-ui": "^2.4.5",
     "jest-fetch-mock": "^3.0.3",
     "lodash": "^4.17.19",
     "moment": "^2.27.0",
+    "moxios": "^0.4.0",
+    "sinon": "^9.0.3",
     "vue": "^2.6.11",
     "vue-good-table": "^2.20.0",
     "vue-lodash": "^2.1.2",
+    "vue-mc": "^0.6.0",
     "vue-router": "^3.2.0",
     "vue2vis": "^0.0.18",
     "vuex": "^3.4.0"
@@ -61,6 +67,7 @@
     },
     "rules": {
       "arrow-body-style": "off",
+      "class-methods-use-this": "off",
       "no-underscore-dangle": "off",
       "no-unused-expressions": "off",
       "no-param-reassign": "off",
@@ -68,7 +75,14 @@
       "no-return-reassign": "off",
       "no-multi-assign": "off",
       "no-plusplus": "off",
+      "object-shorthand": "off",
       "prefer-arrow-callback": "off",
+      "prefer-const": [
+        "warn"
+      ],
+      "prefer-destructuring": [
+        "warn"
+      ],
       "space-before-function-paren": "off",
       "space-infix-ops": "off",
       "spaced-comment": "off",
