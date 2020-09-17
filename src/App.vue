@@ -86,16 +86,15 @@ export default {
     // (short of writing my own classes, which is waaayyy more complicated than it should be).
     // For now, the best way is to put a ResizeObserver on the el-collapse component and refresh the SystemDependencies view whenever the
     // el-collapse resizes.
-    const observer = new ResizeObserver(() => {
-      // This method may get called multiple times during a single expand/collapse, to set a short timeout so we reduce the number of calls
-      // down to (possibly) 1.
-      window.clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = window.setTimeout(() => {
-        const tabContainer = this.$refs.tabContainer,
-          systemDependencies = this.$refs.systemDependencies;
-        (tabContainer.currentName === 'systemDependencies') && systemDependencies && systemDependencies.refresh();
-      }, 50);
-    });
+    const { tabContainer, systemDependencies } = this.$refs,
+      observer = new ResizeObserver(() => {
+        // This method may get called multiple times during a single expand/collapse, to set a short timeout so we reduce the number of
+        // calls down to (possibly) 1.
+        window.clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = window.setTimeout(() => {
+          (tabContainer.currentName === 'systemDependencies') && systemDependencies && systemDependencies.refresh();
+        }, 50);
+      });
     observer.observe(this.$refs.collapseContainer.$el);
   },
   methods: {

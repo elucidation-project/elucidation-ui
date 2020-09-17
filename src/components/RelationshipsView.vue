@@ -193,7 +193,7 @@ export default {
         d3.timer(() => this.svg.call(this.zoom));
       } else {
         this.canvas.selectAll(`g.${expandedNodeClassName}`)
-          .each(function(expanded) {
+          .each(function updateChildren(expanded) {
             expanded.children = null;
             me.update(expanded);
             d3.select(this).classed(expandedNodeClassName, false);
