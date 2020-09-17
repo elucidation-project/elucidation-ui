@@ -80,19 +80,17 @@ export default {
 
     _buildChordDiagram() {
       const me = this,
-        names = this.dependencies.names,
-        matrix = this.dependencies.matrix,
+        { names, matrix } = this.dependencies,
+        { clientWidth, clientHeight } = this.$refs.systemDependenciesSvgDiv,
         color = d3.scaleOrdinal(names, d3.schemeCategory10),
-        width = this.$refs.systemDependenciesSvgDiv.clientWidth,
-        height = this.$refs.systemDependenciesSvgDiv.clientHeight,
         textId = this.library.DOM.uid('text'),
-        innerRadius = Math.min(width, height) * 0.5 - 25,
+        innerRadius = Math.min(clientWidth, clientHeight) * 0.5 - 25,
         outerRadius = innerRadius + 10,
         formatValue = (x) => `${x.toFixed(0)}B`;
 
       this.svg.selectAll('*').remove();
 
-      this.svg.attr('viewBox', [-width / 2, -height / 2, width, height]);
+      this.svg.attr('viewBox', [-clientWidth / 2, -clientHeight / 2, clientWidth, clientHeight]);
 
       const chords = d3Chord.chordDirected()
         .padAngle(10 / innerRadius)
@@ -114,59 +112,31 @@ export default {
 
       this.svg.append('g')
         .attr('fill-opacity', 0.75)
-      .selectAll('g')
-      .data(chords)
-      .join('path')
+        .selectAll('g')
+        .data(chords)
+        .join('path')
         .attr('d', ribbon)
         .attr('fill', (d) => color(names[d.target.index]))
         .style('mix-blend-mode', 'multiply')
-        .on('mousemove', function(d) {
-          const title = d3.select(this).select('title');
-          window.clearTimeout(this.calculateDistanceTimer);
-          this.calculateDistanceTimer = window.setTimeout(() => {
-            const arcs = me.svg.select('g.elucidation-system-dependencies-arc').selectAll('path').nodes(),
-              svgPoint = me.svg.node().createSVGPoint(),
-              bBoxSource = arcs[d.source.index].getBBox(),
-              bBoxTarget = arcs[d.target.index].getBBox();
-
-            svgPoint.x = (bBoxSource.x+bBoxSource.width)/2;
-            svgPoint.y = (bBoxSource.y+bBoxSource.height)/2;
-            const centerSource = svgPoint.matrixTransform(arcs[d.source.index].getCTM()),
-              distToSource = Math.hypot(centerSource.x-me.mousePosition.x, centerSource.y-me.mousePosition.y);
-
-            svgPoint.x = (bBoxTarget.x+bBoxTarget.width)/2;
-            svgPoint.y = (bBoxTarget.y+bBoxTarget.height)/2;
-            const centerTarget = svgPoint.matrixTransform(arcs[d.target.index].getCTM()),
-              distToTarget = Math.hypot(centerTarget.x-me.mousePosition.x, centerTarget.y-me.mousePosition.y);
-            if (distToSource > distToTarget) {
-              me.childService = names[d.source.index];
-              me.parentService = names[d.target.index];
-            } else {
-              me.parentService = names[d.source.index];
-              me.childService = names[d.target.index];
-            }
-            title.text(`Select to view dependencies between ${_.startCase(me.parentService)} and ${_.startCase(me.childService)}`);
-          }, 10);
-        })
-        .on('click', () => {
-          this.$emit('service-selected', me.childService, me.parentService);
-        })
-      .append('title');
+        // NOTE: Need to do it this way so we have the path element ('this') available to us.
+        .on('mousemove', function mouseMoved(d) { me._onMouseMove(this, d); })
+        .on('click', () => this.$emit('service-selected', me.childService, me.parentService))
+        .append('title');
 
       this.svg.append('g')
         .attr('font-family', 'sans-serif')
         .attr('font-size', 10)
         .classed('elucidation-system-dependencies-arc', true)
-      .selectAll('g')
-      .data(chords.groups)
-      .join('g')
+        .selectAll('g')
+        .data(chords.groups)
+        .join('g')
         .call((g) => g.append('path')
           .attr('d', arc)
           .attr('fill', (d) => color(names[d.index]))
           .attr('stroke', '#fff'))
         .call((g) => g.append('text')
           .attr('dy', -3)
-        .append('textPath')
+          .append('textPath')
           .classed('chord-title', true)
           .attr('xlink:href', textId.href)
           .attr('startOffset', (d) => d.startAngle * outerRadius)
@@ -176,11 +146,10 @@ export default {
     },
 
     _buildSystemDependencies() {
-      const systemDependencies = this.systemDependencies,
-        length = systemDependencies.length;
+      const { systemDependencies, systemDependencies: { length } } = this;
 
       this.dependencies = { };
-      if (systemDependencies.length > 0) {
+      if (length > 0) {
         const names = systemDependencies.map((dependency) => dependency.serviceName),
           matrix = new Array(length);
 
@@ -197,6 +166,36 @@ export default {
         this.dependencies.matrix = matrix;
       }
       this._buildChordDiagram();
+    },
+
+    _onMouseMove(el, d) {
+      const { names } = this.dependencies,
+        title = d3.select(el).select('title');
+      window.clearTimeout(el.calculateDistanceTimer);
+      el.calculateDistanceTimer = window.setTimeout(() => {
+        const arcs = this.svg.select('g.elucidation-system-dependencies-arc').selectAll('path').nodes(),
+          svgPoint = this.svg.node().createSVGPoint(),
+          bBoxSource = arcs[d.source.index].getBBox(),
+          bBoxTarget = arcs[d.target.index].getBBox();
+
+        svgPoint.x = (bBoxSource.x+bBoxSource.width)/2;
+        svgPoint.y = (bBoxSource.y+bBoxSource.height)/2;
+        const centerSource = svgPoint.matrixTransform(arcs[d.source.index].getCTM()),
+          distToSource = Math.hypot(centerSource.x-this.mousePosition.x, centerSource.y-this.mousePosition.y);
+
+        svgPoint.x = (bBoxTarget.x+bBoxTarget.width)/2;
+        svgPoint.y = (bBoxTarget.y+bBoxTarget.height)/2;
+        const centerTarget = svgPoint.matrixTransform(arcs[d.target.index].getCTM()),
+          distToTarget = Math.hypot(centerTarget.x-this.mousePosition.x, centerTarget.y-this.mousePosition.y);
+        if (distToSource > distToTarget) {
+          this.childService = names[d.source.index];
+          this.parentService = names[d.target.index];
+        } else {
+          this.parentService = names[d.source.index];
+          this.childService = names[d.target.index];
+        }
+        title.text(`Select to view dependencies between ${_.startCase(this.parentService)} and ${_.startCase(this.childService)}`);
+      }, 10);
     }
   }
 };
