@@ -11,8 +11,9 @@ import 'element-theme-chalk';
 // import the styles
 import 'vue-good-table/dist/vue-good-table.css';
 import './assets/css/main.css';
-import './assets/css/components/Relationships.css';
-import './assets/css/components/SystemDependencies.css';
+import './assets/css/components/DependenciesView.css';
+import './assets/css/components/RelationshipsView.css';
+import './assets/css/components/SystemDependenciesView.css';
 
 Vue.config.productionTip = false;
 

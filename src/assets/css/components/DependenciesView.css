@@ -1,0 +1,21 @@
+
+.elucidation .elucidation-vue-good-table .vgt-table .vgt-row-header {
+  padding: .25em 1.25em .25em .25em;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-table td {
+  padding: .25em;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-fixed-header .vgt-table {
+  background: linear-gradient(#f4f5f8,#f1f3f6);
+}
+
+.elucidation .elucidation-vue-good-table .vgt-fixed-header .elucidation-header-spacer {
+  padding: 0;
+  width: 0;
+}
+
+.elucidation .elucidation-vue-good-table .vgt-table .actions-column {
+  text-align: center;
+}
