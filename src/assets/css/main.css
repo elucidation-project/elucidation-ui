@@ -85,10 +85,6 @@ body, html {
   flex-grow: 1;
 }
 
-.elucidation .unused-identifiers .el-table__row td {
-  padding: 6px 0;
-}
-
 .el-tab-pane.elucidation-relationships,
 .el-tab-pane.elucidation-system-dependencies {
   flex: 1;
@@ -99,25 +95,22 @@ body, html {
   background: #777;
 }
 
+.el-table .el-table__header-wrapper th {
+  background: linear-gradient(#f4f5f8,#f1f3f6);
+  border: 1px solid #dcdfe6;
+}
+
 .elucidation-center .elucidation-relationships,
 .elucidation-center .elucidation-system-dependencies,
 .elucidation-left .el-container {
   padding: 0;
 }
 
-.elucidation .elucidation-vue-good-table .vgt-table .vgt-row-header {
-  padding: .25em 1.25em .25em .25em;
+.elucidation-dialog .el-dialog__header {
+  background-color:  #4682B4;
 }
 
-.elucidation .elucidation-vue-good-table .vgt-table td {
-  padding: .25em;
-}
-
-.elucidation .elucidation-vue-good-table .vgt-fixed-header .vgt-table {
-  background: linear-gradient(#f4f5f8,#f1f3f6);
-}
-
-.elucidation .elucidation-vue-good-table .vgt-fixed-header .elucidation-header-spacer {
-  padding: 0;
-  width: 0;
+.elucidation-dialog .el-dialog__header .el-dialog__title,
+.elucidation-dialog .el-dialog__header .el-dialog__headerbtn .el-dialog__close {
+  color:  #fff;
 }

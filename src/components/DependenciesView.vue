@@ -14,8 +14,32 @@
           collapsable: true
         }">
         <div class="empty-slot" slot="emptystate">There are no Dependencies for the selected service</div>
+        <template slot="table-row" slot-scope="props">
+          <span style="text-align:center" v-if="props.column.field == 'actions'">
+            <el-tooltip effect="dark" content="View Connection Events">
+              <el-button
+                 size="mini"
+                 icon="el-icon-connection"
+                 type="primary"
+                 @click="onViewConnectionEvents(props)" circle/>
+            </el-tooltip>
+          </span>
+          <span v-else>
+            {{props.formattedRow[props.column.field]}}
+          </span>
+        </template>
       </vue-good-table>
     </el-main>
+    <el-dialog ref="connectionEventsDialog" :visible.sync="showConnectionEventsDialog" :modal="false" class="elucidation-dialog">
+      <span class="el-dialog__title" slot="title">
+        {{ connectionEventsDialogTitle }}
+      </span>
+      <el-table :data="connectionEventRows" style="width:100%" empty-text="No Connection Events" max-height=300>
+        <el-table-column property="serviceName" label="Service"></el-table-column>
+        <el-table-column property="eventDirection" label="Event Direction"></el-table-column>
+        <el-table-column property="observedAt" label="Last Observed On" :formatter="dialogDateFormatFn"></el-table-column>
+      </el-table>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -23,6 +47,8 @@
 
 import moment from 'moment';
 import VueGoodTableSpacer from '@/mixins/VueGoodTableSpacer';
+import ConnectionEvent from '../models/ConnectionEvent';
+import ConnectionEvents from '../collections/ConnectionEvents';
 import ServiceDependency from '../models/ServiceDependency';
 import ServiceDependencies from '../collections/ServiceDependencies';
 
@@ -44,9 +70,16 @@ export default {
         field: 'lastObserved',
         width: '40%',
         formatFn: this.dateFormatFn
+      }, {
+        label: 'Actions',
+        field: 'actions',
+        tdClass: 'actions-column'
       }],
       rows: [],
-      dependencies: new ServiceDependencies()
+      dependencies: new ServiceDependencies(),
+      showConnectionEventsDialog: false,
+      connectionEventsDialogTitle: null,
+      connectionEventRows: []
     };
   },
 
@@ -74,8 +107,23 @@ export default {
       return promise;
     },
 
+    onViewConnectionEvents(evt) {
+      const connectionEvents = new ConnectionEvents();
+
+      connectionEvents.set('connectionIdentifier', window.encodeURIComponent(evt.row.connectionIdentifier));
+      this.connectionEventsDialogTitle = `Connection Events for ${evt.row.connectionIdentifier}`;
+      this.showConnectionEventsDialog = true;
+      connectionEvents.fetch()
+        .then(() => {
+          this.connectionEventRows = connectionEvents.models;
+        })
+        .catch((error) => { this.$emit('load-connection-events-error', error); });
+    },
+
     setServices(child, parent) {
       const mask = this.$loading({ target: this.$el });
+      this.childService = child;
+      this.parentService = parent;
       return this.loadDependencies(child, parent)
         .then((data) => this.setDependencies(data || []))
         .finally(() => mask.close());
@@ -101,6 +149,10 @@ export default {
 
     dateFormatFn(value) {
       return moment(value).format('MMM Do YYYY HH:mm');
+    },
+
+    dialogDateFormatFn(row, col, value) {
+      return this.dateFormatFn(value);
     }
   }
 };
